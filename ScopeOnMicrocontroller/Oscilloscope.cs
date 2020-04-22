@@ -11,6 +11,7 @@ namespace ScopeOnMicrocontroller
     {
         Single, Continuous, None
     }
+
     public partial class Oscilloscope : Form
     {
         private const int CHANNEL_1 = 0;
@@ -19,7 +20,8 @@ namespace ScopeOnMicrocontroller
         private double StartElapsed = 0;
         private double[] CurrentShiftChannel = { 0, 0 };
         private Mode CurrentMode = Mode.None;
-        private DateTime startDateTime = DateTime.Now;
+        private int TotalReceivedSamples = 0;
+        private double ShiftY = 0;
 
         public Oscilloscope()
         {
@@ -44,13 +46,13 @@ namespace ScopeOnMicrocontroller
             UpdateAvailableComDevices();
             UpdateXAxis();
             UpdateYAxes();
+            UpdateModeButtons();
 
             UpdateMode(Mode.None);
         }
 
 
-        public int totalRecieved = 0;
-        public double subtract = 0;
+        
 
         private void IncomingADCMessage(IncomingADC incomingADC)
         {
@@ -63,18 +65,17 @@ namespace ScopeOnMicrocontroller
                 StartElapsed = incomingADC.Timestamp;
             }
 
-            double secondsSinceStart = (incomingADC.Timestamp - StartElapsed) - subtract;
+            double secondsSinceStart = (incomingADC.Timestamp - StartElapsed) - ShiftY;
 
             // Add the point to the appropriate series
             // X = seconds since the first data
             // Y = Volts + shift
             MainChart.Series[incomingADC.Channel].Points.AddXY(secondsSinceStart, incomingADC.Volts + CurrentShiftChannel[incomingADC.Channel]);
 
-            totalRecieved++;
+            TotalReceivedSamples++;
             
-            TimeSpan t = DateTime.Now - startDateTime;
 
-            labelPointsRecieved.Text = Math.Round(totalRecieved / secondsSinceStart) + " samples/sec";
+            labelPointsRecieved.Text = Math.Round(TotalReceivedSamples / secondsSinceStart) + " samples/sec";
 
             if (CurrentMode == Mode.Single)
             {
@@ -87,7 +88,7 @@ namespace ScopeOnMicrocontroller
             {
                 if (MainChart.ChartAreas[0].AxisX.Maximum <= secondsSinceStart)
                 {
-                    subtract += MainChart.ChartAreas[0].AxisX.Maximum;
+                    ShiftY += MainChart.ChartAreas[0].AxisX.Maximum;
                     
                     DataPoint dp = new DataPoint
                     {
@@ -101,7 +102,7 @@ namespace ScopeOnMicrocontroller
                         MainChart.Series[1].Points.Add(dp);
                 }
 
-                if (subtract != 0)
+                if (ShiftY != 0)
                 {
                     if (MainChart.Series[incomingADC.Channel].Points.Count > 0)
                         MainChart.Series[incomingADC.Channel].Points.RemoveAt(0);
@@ -114,14 +115,22 @@ namespace ScopeOnMicrocontroller
             TimerOverflows++;
         }
 
+        /// <summary>
+        /// Reset the graph to its default state
+        ///  - Set start time to zero
+        ///  - Set the mode to None
+        ///  - Set timer overflow counter to zero
+        ///  - Set subtract y to zero
+        ///  - Set total samples received to zero
+        ///  - Clear the graph lines
+        /// </summary>
         void ResetGraph()
         {
             StartElapsed = 0;
             CurrentMode = Mode.None;
-            startDateTime = DateTime.Now;
             TimerOverflows = 0;
-            subtract = 0;
-            totalRecieved = 0;
+            ShiftY = 0;
+            TotalReceivedSamples = 0;
             MainChart.Series[0].Points.Clear();
             MainChart.Series[1].Points.Clear();
         }
@@ -190,6 +199,14 @@ namespace ScopeOnMicrocontroller
             UpdateAvailableComDevices();
         }
 
+        private void UpdateModeButtons()
+        {
+            bool connected = Serial.GetInstance().IsConnected;
+
+            buttonSingle.Enabled = connected;
+            buttonContinuous.Enabled = connected;
+        }
+
         /// <summary>
         /// Called when the connect/disconnect button is clicked.
         /// The button toggles between connect and disconnect
@@ -198,6 +215,7 @@ namespace ScopeOnMicrocontroller
         /// <param name="e"></param>
         private void buttonConnect_Click(object sender, EventArgs e)
         {
+
             if (Serial.GetInstance().IsConnected)
             {
                 Serial.GetInstance().Disconnect();
@@ -215,7 +233,8 @@ namespace ScopeOnMicrocontroller
 
                 UpdateMode(Mode.None);
             }
-            
+
+            UpdateModeButtons();
         }
 
         #endregion

@@ -32,6 +32,7 @@
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Oscilloscope));
             this.MainChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.graphDataPointBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.boxChannel1 = new System.Windows.Forms.GroupBox();
@@ -636,6 +637,7 @@
             this.Controls.Add(this.buttonSingle);
             this.Controls.Add(this.boxChannel1);
             this.Controls.Add(this.MainChart);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Oscilloscope";
             this.Text = "Oscilloscope on a microcontroller";
             ((System.ComponentModel.ISupportInitialize)(this.MainChart)).EndInit();

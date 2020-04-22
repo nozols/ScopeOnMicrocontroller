@@ -19,9 +19,11 @@ namespace ScopeOnMicrocontroller
     class Serial
     {
         private SerialPort _serialPort;
+        private IncomingMessage CurrentMessage = null;
         private static Serial Instance;
         public delegate void ADCSerialDataReceivedHandler(IncomingMessage incomingADC);
         public event ADCSerialDataReceivedHandler ADCSerialDataReceived;
+        
 
         /// <summary>
         /// Returns wether the serialport is connected.
@@ -73,8 +75,8 @@ namespace ScopeOnMicrocontroller
             _serialPort.Open();
         }
 
-        private IncomingMessage CurrentMessage = null;
-        bool isRunning = false;
+        
+
         /// <summary>
         /// The event listener for new serial data
         /// - Processes the incoming data
