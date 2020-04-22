@@ -47,21 +47,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GraphDataPoint.cs" />
     <Compile Include="Messages\IncomingADC.cs" />
     <Compile Include="Messages\IncomingMessage.cs" />
     <Compile Include="Messages\IncomingTimerOverflow.cs" />
-    <Compile Include="Oscilloscope.cs">
+    <Compile Include="Window\Channel.cs" />
+    <Compile Include="Window\Oscilloscope.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Oscilloscope.Designer.cs">
+    <Compile Include="Window\Oscilloscope.Designer.cs">
       <DependentUpon>Oscilloscope.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reference.cs" />
     <Compile Include="Serial.cs" />
-    <EmbeddedResource Include="Oscilloscope.resx">
+    <Compile Include="Window\VoltageInput.cs" />
+    <EmbeddedResource Include="Window\Oscilloscope.resx">
       <DependentUpon>Oscilloscope.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

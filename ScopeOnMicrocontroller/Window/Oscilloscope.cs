@@ -1,4 +1,5 @@
 ﻿using ScopeOnMicrocontroller.Messages;
+using ScopeOnMicrocontroller.Window;
 using System;
 using System.Drawing;
 using System.IO.Ports;
@@ -22,6 +23,8 @@ namespace ScopeOnMicrocontroller
         private Mode CurrentMode = Mode.None;
         private int[] TotalReceivedSamples = new int[] { 0, 0 };
         private double ShiftY = 0;
+
+        private Channel[] Channels = new Channel[2];
 
         public Oscilloscope()
         {
@@ -49,10 +52,15 @@ namespace ScopeOnMicrocontroller
             UpdateModeButtons();
 
             UpdateMode(Mode.None);
+
+            
+            for (int channelNumber = 0; channelNumber < Channels.Length; channelNumber++)
+            {
+                Channels[channelNumber] = new Channel(channelNumber);
+                Controls.Add(Channels[channelNumber].InitializeComponent(new Point(450, 50 + Channel.Height * channelNumber)));
+            }
+            
         }
-
-
-        
 
         private void IncomingADCMessage(IncomingADC incomingADC)
         {
@@ -580,10 +588,5 @@ namespace ScopeOnMicrocontroller
         }
 
         #endregion
-
-        private void boxChannel1_Enter(object sender, EventArgs e)
-        {
-
-        }
     }
 }
