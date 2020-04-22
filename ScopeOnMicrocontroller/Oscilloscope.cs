@@ -20,7 +20,7 @@ namespace ScopeOnMicrocontroller
         private double StartElapsed = 0;
         private double[] CurrentShiftChannel = { 0, 0 };
         private Mode CurrentMode = Mode.None;
-        private int TotalReceivedSamples = 0;
+        private int[] TotalReceivedSamples = new int[] { 0, 0 };
         private double ShiftY = 0;
 
         public Oscilloscope()
@@ -72,10 +72,17 @@ namespace ScopeOnMicrocontroller
             // Y = Volts + shift
             MainChart.Series[incomingADC.Channel].Points.AddXY(secondsSinceStart, incomingADC.Volts + CurrentShiftChannel[incomingADC.Channel]);
 
-            TotalReceivedSamples++;
+            TotalReceivedSamples[incomingADC.Channel]++;
             
-
-            labelPointsRecieved.Text = Math.Round(TotalReceivedSamples / secondsSinceStart) + " samples/sec";
+            if (incomingADC.Channel == CHANNEL_1)
+            {
+                labelSampleRateChannel0.Text = Math.Round(TotalReceivedSamples[incomingADC.Channel] / secondsSinceStart) + " sps";
+            }
+            else
+            {
+                labelSampleRateChannel1.Text = Math.Round(TotalReceivedSamples[incomingADC.Channel] / secondsSinceStart) + " sps";
+            }
+            
 
             if (CurrentMode == Mode.Single)
             {
@@ -130,7 +137,7 @@ namespace ScopeOnMicrocontroller
             CurrentMode = Mode.None;
             TimerOverflows = 0;
             ShiftY = 0;
-            TotalReceivedSamples = 0;
+            TotalReceivedSamples = new int[] { 0, 0 };
             MainChart.Series[0].Points.Clear();
             MainChart.Series[1].Points.Clear();
         }
@@ -573,5 +580,10 @@ namespace ScopeOnMicrocontroller
         }
 
         #endregion
+
+        private void boxChannel1_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -34,7 +34,6 @@
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Oscilloscope));
             this.MainChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.graphDataPointBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.boxChannel1 = new System.Windows.Forms.GroupBox();
             this.comboBoxShiftPrefixChannel1 = new System.Windows.Forms.ComboBox();
             this.comboBoxVoltagePrefixChannel1 = new System.Windows.Forms.ComboBox();
@@ -68,9 +67,12 @@
             this.label6 = new System.Windows.Forms.Label();
             this.numericXDivisions = new System.Windows.Forms.NumericUpDown();
             this.comboBoxVoltagePrefixChannel2 = new System.Windows.Forms.ComboBox();
-            this.labelPointsRecieved = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.labelSampleRateChannel0 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.labelSampleRateChannel1 = new System.Windows.Forms.Label();
+            this.graphDataPointBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.MainChart)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.graphDataPointBindingSource)).BeginInit();
             this.boxChannel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yPosChannel1)).BeginInit();
@@ -85,6 +87,7 @@
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericYDivisions)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericXDivisions)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.graphDataPointBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // MainChart
@@ -110,13 +113,9 @@
             series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
             this.MainChart.Series.Add(series1);
             this.MainChart.Series.Add(series2);
-            this.MainChart.Size = new System.Drawing.Size(575, 542);
+            this.MainChart.Size = new System.Drawing.Size(575, 586);
             this.MainChart.TabIndex = 0;
             this.MainChart.Text = "chart1";
-            // 
-            // graphDataPointBindingSource
-            // 
-            this.graphDataPointBindingSource.DataSource = typeof(ScopeOnMicrocontroller.GraphDataPoint);
             // 
             // boxChannel1
             // 
@@ -124,12 +123,13 @@
             this.boxChannel1.Controls.Add(this.comboBoxShiftPrefixChannel1);
             this.boxChannel1.Controls.Add(this.comboBoxVoltagePrefixChannel1);
             this.boxChannel1.Controls.Add(this.tableLayoutPanel1);
-            this.boxChannel1.Location = new System.Drawing.Point(594, 262);
+            this.boxChannel1.Location = new System.Drawing.Point(593, 233);
             this.boxChannel1.Name = "boxChannel1";
-            this.boxChannel1.Size = new System.Drawing.Size(287, 143);
+            this.boxChannel1.Size = new System.Drawing.Size(287, 186);
             this.boxChannel1.TabIndex = 1;
             this.boxChannel1.TabStop = false;
             this.boxChannel1.Text = "Channel 1";
+            this.boxChannel1.Enter += new System.EventHandler(this.boxChannel1_Enter);
             // 
             // comboBoxShiftPrefixChannel1
             // 
@@ -171,14 +171,18 @@
             this.tableLayoutPanel1.Controls.Add(this.mVDivChannel1, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.EnableChannel1, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label7, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.labelSampleRateChannel0, 1, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(7, 20);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowCount = 5;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(274, 114);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(274, 166);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // label2
@@ -280,9 +284,9 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.comboBoxShiftPrefixChannel2);
             this.groupBox1.Controls.Add(this.tableLayoutPanel2);
-            this.groupBox1.Location = new System.Drawing.Point(594, 411);
+            this.groupBox1.Location = new System.Drawing.Point(595, 425);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(287, 143);
+            this.groupBox1.Size = new System.Drawing.Size(287, 173);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Channel 2";
@@ -308,19 +312,22 @@
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Controls.Add(this.label9, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.label3, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.yPosChannel2, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.mVDivChannel2, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.label4, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.EnableChannel2, 1, 2);
+            this.tableLayoutPanel2.Controls.Add(this.labelSampleRateChannel1, 1, 3);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(7, 20);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 4;
+            this.tableLayoutPanel2.RowCount = 5;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(274, 114);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(274, 153);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // label3
@@ -455,7 +462,7 @@
             this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.timeFactor);
             this.groupBox2.Controls.Add(this.comboBoxTimePrefix);
-            this.groupBox2.Location = new System.Drawing.Point(595, 212);
+            this.groupBox2.Location = new System.Drawing.Point(595, 183);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(286, 44);
             this.groupBox2.TabIndex = 7;
@@ -514,7 +521,7 @@
             // 
             this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.tableLayoutPanel3);
-            this.groupBox3.Location = new System.Drawing.Point(595, 98);
+            this.groupBox3.Location = new System.Drawing.Point(595, 69);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(286, 108);
             this.groupBox3.TabIndex = 8;
@@ -605,27 +612,61 @@
             "uV",
             "mV",
             "V"});
-            this.comboBoxVoltagePrefixChannel2.Location = new System.Drawing.Point(834, 481);
+            this.comboBoxVoltagePrefixChannel2.Location = new System.Drawing.Point(835, 494);
             this.comboBoxVoltagePrefixChannel2.Name = "comboBoxVoltagePrefixChannel2";
             this.comboBoxVoltagePrefixChannel2.Size = new System.Drawing.Size(38, 21);
             this.comboBoxVoltagePrefixChannel2.TabIndex = 1;
             this.comboBoxVoltagePrefixChannel2.SelectedIndexChanged += new System.EventHandler(this.comboBoxVoltagePrefixChannel2_SelectedIndexChanged);
             // 
-            // labelPointsRecieved
+            // label7
             // 
-            this.labelPointsRecieved.AutoSize = true;
-            this.labelPointsRecieved.Location = new System.Drawing.Point(741, 79);
-            this.labelPointsRecieved.Name = "labelPointsRecieved";
-            this.labelPointsRecieved.Size = new System.Drawing.Size(13, 13);
-            this.labelPointsRecieved.TabIndex = 9;
-            this.labelPointsRecieved.Text = "0";
+            this.label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(3, 133);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(63, 13);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "Sample rate";
+            // 
+            // labelSampleRateChannel0
+            // 
+            this.labelSampleRateChannel0.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.labelSampleRateChannel0.AutoSize = true;
+            this.labelSampleRateChannel0.Location = new System.Drawing.Point(140, 133);
+            this.labelSampleRateChannel0.Name = "labelSampleRateChannel0";
+            this.labelSampleRateChannel0.Size = new System.Drawing.Size(32, 13);
+            this.labelSampleRateChannel0.TabIndex = 6;
+            this.labelSampleRateChannel0.Text = "0 sps";
+            // 
+            // label9
+            // 
+            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(3, 133);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(63, 13);
+            this.label9.TabIndex = 7;
+            this.label9.Text = "Sample rate";
+            // 
+            // labelSampleRateChannel1
+            // 
+            this.labelSampleRateChannel1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.labelSampleRateChannel1.AutoSize = true;
+            this.labelSampleRateChannel1.Location = new System.Drawing.Point(140, 133);
+            this.labelSampleRateChannel1.Name = "labelSampleRateChannel1";
+            this.labelSampleRateChannel1.Size = new System.Drawing.Size(32, 13);
+            this.labelSampleRateChannel1.TabIndex = 8;
+            this.labelSampleRateChannel1.Text = "0 sps";
+            // 
+            // graphDataPointBindingSource
+            // 
+            this.graphDataPointBindingSource.DataSource = typeof(ScopeOnMicrocontroller.GraphDataPoint);
             // 
             // Oscilloscope
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(888, 566);
-            this.Controls.Add(this.labelPointsRecieved);
+            this.ClientSize = new System.Drawing.Size(888, 610);
             this.Controls.Add(this.comboBoxVoltagePrefixChannel2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -641,7 +682,6 @@
             this.Name = "Oscilloscope";
             this.Text = "Oscilloscope on a microcontroller";
             ((System.ComponentModel.ISupportInitialize)(this.MainChart)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.graphDataPointBindingSource)).EndInit();
             this.boxChannel1.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -660,8 +700,8 @@
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericYDivisions)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericXDivisions)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.graphDataPointBindingSource)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -701,7 +741,10 @@
         private System.Windows.Forms.ComboBox comboBoxShiftPrefixChannel2;
         private System.Windows.Forms.DataVisualization.Charting.Chart MainChart;
         private System.Windows.Forms.BindingSource graphDataPointBindingSource;
-        private System.Windows.Forms.Label labelPointsRecieved;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label labelSampleRateChannel0;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label labelSampleRateChannel1;
     }
 }
 
