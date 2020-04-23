@@ -1,4 +1,12 @@
-﻿using ScopeOnMicrocontroller.Messages;
+﻿/*
+ * @Author Niels de Boer
+ * 
+ * This class handles the screen.
+ *  - Mode handling
+ *  - X-axis handling
+ *  - Y-axis and drawing are handled in Channel
+ */
+using ScopeOnMicrocontroller.Messages;
 using ScopeOnMicrocontroller.Window;
 using System;
 using System.Drawing;
@@ -8,6 +16,9 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace ScopeOnMicrocontroller
 {
+    /// <summary>
+    /// This enum is used to communicate the mode of the scope
+    /// </summary>
     enum Mode
     {
         Single, Continuous, None
@@ -15,163 +26,112 @@ namespace ScopeOnMicrocontroller
 
     public partial class Oscilloscope : Form
     {
-        private const int CHANNEL_1 = 0;
-        private const int CHANNEL_2 = 1;
-        private int TimerOverflows = 0;
-        private double StartElapsed = 0;
-        private double[] CurrentShiftChannel = { 0, 0 };
         private Mode CurrentMode = Mode.None;
-        private int[] TotalReceivedSamples = new int[] { 0, 0 };
-        private double ShiftY = 0;
 
         private Channel[] Channels = new Channel[2];
+
+        private Serial SerialInstance = Serial.GetInstance();
+        private Axis XAxis;
+
+        double ScopeStartTimestamp = -1;
+        int TimerOverflows = 0;
 
         public Oscilloscope()
         {
             InitializeComponent();
-
             // Add event listener for new ADC data
-            Serial.GetInstance().ADCSerialDataReceived += Oscilloscope_ADCSerialDataReceived;
+            Serial.GetInstance().ADCSerialDataReceived += Oscilloscope_SerialDataReceived;
 
             // Set the default values for the dropdown boxes
             comboBoxTimePrefix.SelectedIndex = 2;
-            comboBoxVoltagePrefixChannel1.SelectedIndex = 1;
-            comboBoxVoltagePrefixChannel2.SelectedIndex = 1;
-            comboBoxShiftPrefixChannel1.SelectedIndex = 1;
-            comboBoxShiftPrefixChannel2.SelectedIndex = 1;
 
             // Always show axes even if series are disabled
             MainChart.ChartAreas[0].AxisX.Enabled = AxisEnabled.True;
             MainChart.ChartAreas[0].AxisY.Enabled = AxisEnabled.True;
             MainChart.ChartAreas[0].AxisY2.Enabled = AxisEnabled.True;
-            
+
+            XAxis = MainChart.ChartAreas[0].AxisX;
+
+            DoubleBuffered = true;
+
+            InitializeChannels();
+
             // Update
             UpdateAvailableComDevices();
             UpdateXAxis();
             UpdateYAxes();
-            UpdateModeButtons();
+            SetModeButtonsStatus();
 
             UpdateMode(Mode.None);
-
-            
-            for (int channelNumber = 0; channelNumber < Channels.Length; channelNumber++)
-            {
-                Channels[channelNumber] = new Channel(channelNumber);
-                Controls.Add(Channels[channelNumber].InitializeComponent(new Point(450, 50 + Channel.Height * channelNumber)));
-            }
-            
         }
 
+        /// <summary>
+        /// Hanlde an incoming ADC message
+        /// </summary>
+        /// <param name="incomingADC">THe message</param>
         private void IncomingADCMessage(IncomingADC incomingADC)
         {
+            // Adjust the timer for the overflows
             incomingADC.SetTimerOverflows(TimerOverflows);
 
-            // Check if the this is the first data that has come in
-            if (StartElapsed == 0)
+            if (ScopeStartTimestamp == -1)
             {
-                // Since this is the first data that has come in, set this as the reference
-                StartElapsed = incomingADC.Timestamp;
+                // This is the first data that was received
+                ScopeStartTimestamp = incomingADC.Timestamp;
             }
 
-            double secondsSinceStart = (incomingADC.Timestamp - StartElapsed) - ShiftY;
+            // Adjust the timer for the start time
+            incomingADC.SetStartTime(ScopeStartTimestamp);
 
-            // Add the point to the appropriate series
-            // X = seconds since the first data
-            // Y = Volts + shift
-            MainChart.Series[incomingADC.Channel].Points.AddXY(secondsSinceStart, incomingADC.Volts + CurrentShiftChannel[incomingADC.Channel]);
+            // Hand off the the channel instance for drawing
+            Channels[incomingADC.Channel].IncomingADCMessage(incomingADC);
 
-            TotalReceivedSamples[incomingADC.Channel]++;
-            
-            if (incomingADC.Channel == CHANNEL_1)
-            {
-                labelSampleRateChannel0.Text = Math.Round(TotalReceivedSamples[incomingADC.Channel] / secondsSinceStart) + " sps";
-            }
-            else
-            {
-                labelSampleRateChannel1.Text = Math.Round(TotalReceivedSamples[incomingADC.Channel] / secondsSinceStart) + " sps";
-            }
-            
-
+            // If the mode is single we set the mode to zero
+            // if the end of the graph is reached
+            // Continous mode handling is done inside of the seperate channels
             if (CurrentMode == Mode.Single)
             {
-                if (MainChart.ChartAreas[0].AxisX.Maximum <= secondsSinceStart)
+                if (incomingADC.Timestamp >= XAxis.Maximum)
                 {
                     UpdateMode(Mode.None);
                 }
             }
-            else if (CurrentMode == Mode.Continuous)
-            {
-                if (MainChart.ChartAreas[0].AxisX.Maximum <= secondsSinceStart)
-                {
-                    ShiftY += MainChart.ChartAreas[0].AxisX.Maximum;
-                    
-                    DataPoint dp = new DataPoint
-                    {
-                        IsEmpty = true
-                    };                    
-
-                    if (MainChart.Series[0].Points.Count > 0)
-                        MainChart.Series[0].Points.Add(dp);
-
-                    if (MainChart.Series[1].Points.Count > 0)
-                        MainChart.Series[1].Points.Add(dp);
-                }
-
-                if (ShiftY != 0)
-                {
-                    if (MainChart.Series[incomingADC.Channel].Points.Count > 0)
-                        MainChart.Series[incomingADC.Channel].Points.RemoveAt(0);
-                }
-            }
-        }
-
-        private void IncomingTimerOverflow(IncomingTimerOverflow incomingTimerOverflow)
-        {
-            TimerOverflows++;
         }
 
         /// <summary>
-        /// Reset the graph to its default state
-        ///  - Set start time to zero
-        ///  - Set the mode to None
-        ///  - Set timer overflow counter to zero
-        ///  - Set subtract y to zero
-        ///  - Set total samples received to zero
-        ///  - Clear the graph lines
+        /// Called when a IncomingTimerOverflow message has been recieved
         /// </summary>
-        void ResetGraph()
+        private void IncomingTimerOverflow()
         {
-            StartElapsed = 0;
-            CurrentMode = Mode.None;
-            TimerOverflows = 0;
-            ShiftY = 0;
-            TotalReceivedSamples = new int[] { 0, 0 };
-            MainChart.Series[0].Points.Clear();
-            MainChart.Series[1].Points.Clear();
+            TimerOverflows++;
         }
 
         /// <summary>
         /// Callback for when new serial data has arrived
         /// </summary>
         /// <param name="serialData">The serial data</param>
-        private void Oscilloscope_ADCSerialDataReceived(IncomingMessage serialData)
+        private void Oscilloscope_SerialDataReceived(IncomingMessage serialData)
         {
             // This is needed because the event comes from a different thread
             if (InvokeRequired)
             {
                 // Re-create method call
-                var callback = new Serial.ADCSerialDataReceivedHandler(Oscilloscope_ADCSerialDataReceived);
+                var callback = new Serial.ADCSerialDataReceivedHandler(Oscilloscope_SerialDataReceived);
                 BeginInvoke(callback, new object[] { serialData });
             }
             else
             {
                 if (serialData is IncomingADC)
                 {
-                    IncomingADCMessage((IncomingADC)serialData);
+                    // Only draw when the mode is set
+                    if (CurrentMode != Mode.None)
+                    {
+                        IncomingADCMessage((IncomingADC)serialData);
+                    }
                 }
                 else if (serialData is IncomingTimerOverflow)
                 {
-                    IncomingTimerOverflow((IncomingTimerOverflow)serialData);
+                    IncomingTimerOverflow();
                 }
             }
         }
@@ -214,9 +174,12 @@ namespace ScopeOnMicrocontroller
             UpdateAvailableComDevices();
         }
 
-        private void UpdateModeButtons()
+        /// <summary>
+        /// Enable or disable the mode buttons if a device is connected
+        /// </summary>
+        private void SetModeButtonsStatus()
         {
-            bool connected = Serial.GetInstance().IsConnected;
+            bool connected = SerialInstance.IsConnected;
 
             buttonSingle.Enabled = connected;
             buttonContinuous.Enabled = connected;
@@ -230,26 +193,20 @@ namespace ScopeOnMicrocontroller
         /// <param name="e"></param>
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-
             if (Serial.GetInstance().IsConnected)
             {
                 Serial.GetInstance().Disconnect();
-                // Reset the start time
-                StartElapsed = 0;
                 buttonConnect.Text = "Connect";
             }
             else
             {
                 Serial.GetInstance().Connect(comboBoxDevices.Text);
-                // Clear the old data
-                MainChart.Series[0].Points.Clear();
-                MainChart.Series[1].Points.Clear();
                 buttonConnect.Text = "Disconnect";
-
-                UpdateMode(Mode.None);
             }
 
-            UpdateModeButtons();
+
+            UpdateMode(Mode.None);
+            SetModeButtonsStatus();
         }
 
         #endregion
@@ -266,28 +223,6 @@ namespace ScopeOnMicrocontroller
             Reference.TimePrefixFactors.TryGetValue(comboBoxTimePrefix.Text, out double result);
 
             return result;
-        }
-
-        /// <summary>
-        /// This function will parse the SI units of voltage
-        /// to a numerical factor
-        /// </summary>
-        /// <param name="channel">For which channel</param>
-        /// <returns>Voltage multiplication factor</returns>
-        double GetVoltagePrefixFactor(int channel)
-        {
-            if (channel == CHANNEL_1)
-            {
-                Reference.VoltagePrefixFactors.TryGetValue(comboBoxVoltagePrefixChannel1.Text, out double result);
-
-                return result;
-            }
-            else
-            {
-                Reference.VoltagePrefixFactors.TryGetValue(comboBoxVoltagePrefixChannel2.Text, out double result);
-
-                return result;
-            }
         }
 
         /// <summary>
@@ -330,56 +265,18 @@ namespace ScopeOnMicrocontroller
             xAxis.MajorTickMark.TickMarkStyle = TickMarkStyle.AcrossAxis;
             xAxis.LabelStyle.Angle = -45;
             xAxis.LabelStyle.Format = prefixFormatter;
-            xAxis.Title = timeFactor.Value + " " + comboBoxTimePrefix.Text + "/div";
+            xAxis.Title = timeFactor.Value + " " + comboBoxTimePrefix.Text + "/div";           
 
+            // Clear the channels if we are currently running
             if (CurrentMode != Mode.None)
             {
-                MainChart.Series[0].Points.Clear();
-                MainChart.Series[1].Points.Clear();
-                StartElapsed = 0;
+                ClearChannels();
             }
-            
 
             MainChart.Update();
         }
 
-        /// <summary>
-        /// Update both the Y axes by calling UpdateYAxis()
-        /// </summary>
-        void UpdateYAxes()
-        {
-            // Update channel 1
-            UpdateYAxis(decimal.ToDouble(mVDivChannel1.Value) * GetVoltagePrefixFactor(CHANNEL_1), MainChart.ChartAreas[0].AxisY);
-
-            // Update channel 2
-            UpdateYAxis(decimal.ToDouble(mVDivChannel2.Value) * GetVoltagePrefixFactor(CHANNEL_2), MainChart.ChartAreas[0].AxisY2);
-
-            MainChart.Update();
-        }
-
-        /// <summary>
-        /// Update an y Axis
-        ///  - Set the interval (voltagePerDivision)
-        ///  - Set minimum 
-        ///  - Set maximum
-        /// </summary>
-        /// <param name="voltagePerDivision">How many volts per division</param>
-        /// <param name="yAxis">The axis to modify</param>
-        void UpdateYAxis(double voltagePerDivision, Axis yAxis)
-        {           int yDivision = GetYDivisions();
-
-            yAxis.Interval = 0.5 * yDivision * voltagePerDivision;
-            yAxis.Minimum = -0.5 * GetYDivisions() * voltagePerDivision;
-            yAxis.Maximum = 0.5 * GetYDivisions() * voltagePerDivision;
-            yAxis.MinorGrid.Interval = voltagePerDivision;
-            yAxis.MinorGrid.LineColor = Color.LightGray;
-            yAxis.MinorGrid.LineDashStyle = ChartDashStyle.DashDot;
-            yAxis.MinorGrid.Enabled = true;
-            yAxis.MinorTickMark.Interval = yAxis.MinorGrid.Interval;
-            yAxis.MinorTickMark.Enabled = true;
-            yAxis.MinorTickMark.TickMarkStyle = TickMarkStyle.AcrossAxis;
-            yAxis.LabelStyle.Interval = yAxis.MinorGrid.Interval;
-        }
+        #endregion
 
         #region The following functions are for updating the axes when an input has changed
 
@@ -388,19 +285,9 @@ namespace ScopeOnMicrocontroller
             UpdateXAxis();
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBoxTimePrefix_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateXAxis();
-        }
-
-        private void mVDivChannel1_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateYAxes();
-        }
-
-        private void mVDivChannel2_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateYAxes();
         }
 
         private void numericXDivisions_ValueChanged(object sender, EventArgs e)
@@ -413,111 +300,6 @@ namespace ScopeOnMicrocontroller
             UpdateYAxes();
         }
 
-        private void comboBoxVoltagePrefixChannel1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateYAxes();
-        }
-
-        private void comboBoxVoltagePrefixChannel2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateYAxes();
-        }
-
-        #endregion
-
-        #endregion
-
-        #region The following functions are for shifting the two channels up and down
-
-        /// <summary>
-        /// Update the channel shift for a channel
-        /// - The Values are fetched and adjusted
-        /// - passed to UpdateChannelShift(int, double)
-        /// </summary>
-        /// <param name="channel"></param>
-        void UpdateChannelShift(int channel)
-        {
-            if (channel == CHANNEL_1)
-            {
-                Reference.VoltagePrefixFactors.TryGetValue(comboBoxShiftPrefixChannel1.Text, out double shiftFactor);
-                shiftFactor *= decimal.ToDouble(yPosChannel1.Value);
-                UpdateChannelShift(channel, shiftFactor);
-            }
-            else
-            {
-                Reference.VoltagePrefixFactors.TryGetValue(comboBoxShiftPrefixChannel2.Text, out double shiftFactor);
-                shiftFactor *= decimal.ToDouble(yPosChannel2.Value);
-                UpdateChannelShift(channel, shiftFactor);
-            }
-        }
-
-        /// <summary>
-        /// Set the channel shift to a specific amount
-        /// </summary>
-        /// <param name="channel">Channel to shift</param>
-        /// <param name="amount">Set shift to</param>
-        void UpdateChannelShift(int channel, double amount)
-        {
-            // Calculate by which amount the line should actually be shifted
-            double amountToShift = amount - CurrentShiftChannel[channel];
-
-            // Adjust each y point
-            foreach (DataPoint point in MainChart.Series[channel].Points)
-            {
-                for(int i = 0; i < point.YValues.Length; i++)
-                {
-                    point.YValues[i] += amountToShift;
-                }
-            }
-
-            // Update the current shift
-            CurrentShiftChannel[channel] = amount;
-        }
-
-
-        private void yPosChannel2_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateChannelShift(CHANNEL_2);
-        }
-
-        private void comboBoxShiftPrefixChannel2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateChannelShift(CHANNEL_2);
-        }
-
-        private void yPosChannel1_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateChannelShift(CHANNEL_1);
-        }
-
-        private void comboBoxShiftPrefixChannel1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateChannelShift(CHANNEL_1);
-        }
-
-        #endregion
-
-        #region Functions for enabeling/disabeling channels
-
-        private void SetScopesAccordingToCheckboxes()
-        {
-            Serial.GetInstance().SetScopeEnabled(EnableChannel1.Checked, EnableChannel2.Checked);
-        }
-
-        private void EnableChannel2_CheckedChanged(object sender, EventArgs e)
-        {
-            MainChart.Series[CHANNEL_2].Enabled = EnableChannel2.Checked;
-
-            SetScopesAccordingToCheckboxes();
-        }
-
-        private void EnableChannel1_CheckedChanged(object sender, EventArgs e)
-        {
-            MainChart.Series[CHANNEL_1].Enabled = EnableChannel1.Checked;
-
-            SetScopesAccordingToCheckboxes();
-        }
-
         #endregion
 
         #region Functions for setting the mode
@@ -528,26 +310,28 @@ namespace ScopeOnMicrocontroller
         /// <param name="mode">The mode to change to</param>
         void UpdateMode(Mode mode)
         {
-            Console.WriteLine(mode);
-            if (mode == Mode.None)
+            CurrentMode = mode;
+            SetChannelMode(mode);
+            ScopeStartTimestamp = -1;
+
+            if (mode == Mode.Single)
             {
-                Serial.GetInstance().SetScopeEnabled(false, false);
-                buttonSingle.BackColor = Color.Salmon;
+                buttonSingle.BackColor = Color.LawnGreen;
                 buttonContinuous.BackColor = Color.Salmon;
-            }
-            else if (mode == Mode.Single)
-            {
-                ResetGraph();
-                SetScopesAccordingToCheckboxes();
-                buttonSingle.BackColor = Color.DarkSeaGreen;
+                SyncChannelEnabled();
             }
             else if (mode == Mode.Continuous)
             {
-                ResetGraph();
-                SetScopesAccordingToCheckboxes();
-                buttonContinuous.BackColor = Color.DarkSeaGreen;
+                buttonSingle.BackColor = Color.Salmon;
+                buttonContinuous.BackColor = Color.LawnGreen;
+                SyncChannelEnabled();
             }
-            CurrentMode = mode;
+            else
+            {
+                buttonSingle.BackColor = Color.Salmon;
+                buttonContinuous.BackColor = Color.Salmon;
+                SerialInstance.SetScopeEnabled(false, false);
+            }
         }
 
         /// <summary>
@@ -585,6 +369,69 @@ namespace ScopeOnMicrocontroller
                 UpdateMode(Mode.Continuous);
             }
             
+        }
+
+        #endregion
+
+        #region Functions for interacting with both channels
+
+        /// <summary>
+        /// Initialize the two channels
+        /// </summary>
+        void InitializeChannels()
+        {
+            for (int channelNumber = 0; channelNumber < Channels.Length; channelNumber++)
+            {
+                Channels[channelNumber] = new Channel(channelNumber, MainChart);
+                Controls.Add(Channels[channelNumber].InitializeComponent(new Point(645, 233 + Channel.Height * channelNumber)));
+            }
+        }
+
+        /// <summary>
+        /// Update the styles of the y axes of the channels
+        /// </summary>
+        void UpdateYAxes()
+        {
+            foreach (Channel channel in Channels)
+            {
+                channel.SetYDivisions(GetYDivisions());
+            }
+        }
+
+        /// <summary>
+        /// Sync the enabled checkboxes with the device
+        /// </summary>
+        void SyncChannelEnabled()
+        {
+            foreach (Channel channel in Channels)
+            {
+                SerialInstance.EnableChannel(channel.ChannelNumber, channel.IsEnabled());
+            }
+        }
+
+        /// <summary>
+        /// Set the mode of the channels
+        /// </summary>
+        /// <param name="mode">Channel mode</param>
+        void SetChannelMode(Mode mode)
+        {
+            foreach (Channel channel in Channels)
+            {
+                channel.SetMode(mode);
+            }
+        }
+
+        /// <summary>
+        /// Remove the datapoints that are not visible
+        /// </summary>
+        void ClearChannels()
+        {
+            ScopeStartTimestamp = -1;
+
+            foreach (Channel channel in Channels)
+            {
+                channel.ClearChannel();
+            }
         }
 
         #endregion

@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+ * @Author Niels de Boer
+ * 
+ * This class represents an incoming timer overflow message.
+ * A timer overflow message indicates that the 100us counter on the
+ * microcontroller has overflown. This means that this should be taken
+ * into account when the timestamp is calculated.
+ */
 
 namespace ScopeOnMicrocontroller.Messages
 {

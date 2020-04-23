@@ -23,6 +23,8 @@ namespace ScopeOnMicrocontroller
         private static Serial Instance;
         public delegate void ADCSerialDataReceivedHandler(IncomingMessage incomingADC);
         public event ADCSerialDataReceivedHandler ADCSerialDataReceived;
+
+        private bool[] ChannelEnabled = new bool[] { false, false };
         
 
         /// <summary>
@@ -73,6 +75,9 @@ namespace ScopeOnMicrocontroller
 
             // Open the connection
             _serialPort.Open();
+
+            // Set both scopes to the default value
+            SetScopeEnabled(false, false);
         }
 
         
@@ -159,6 +164,13 @@ namespace ScopeOnMicrocontroller
             SendMessage((byte)messageToSend);
         }
 
+        public void EnableChannel(int channel, bool enabled)
+        {
+            ChannelEnabled[channel] = enabled;
+
+            SetScopeEnabled(ChannelEnabled[0], ChannelEnabled[1]);
+        }
+
         /// <summary>
         /// Send a message to the connected device
         /// </summary>
@@ -167,7 +179,7 @@ namespace ScopeOnMicrocontroller
         {
             if (IsConnected)
             {
-                Console.WriteLine("TEST: {0}", message);
+                Console.WriteLine("Outgoing message: {0}", message);
                 _serialPort.Write(new byte[] { message }, 0, 1);
             }
         }

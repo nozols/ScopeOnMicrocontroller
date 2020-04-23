@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+ * @Author Niels de Boer
+ * 
+ * This message contains a timestamp and an measured value.
+ * Be aware that the timestamp must be adjusted for the overflow timer
+ */
+using System;
 
 namespace ScopeOnMicrocontroller.Messages
 {
@@ -15,6 +17,11 @@ namespace ScopeOnMicrocontroller.Messages
         /// The amount of timer overflows that have occured
         /// </summary>
         private int TimerOverflows = 0;
+
+        /// <summary>
+        /// The time at which measurements were started
+        /// </summary>
+        private double StartTime = 0;
 
         /// <summary>
         /// Get the volts of this measurement
@@ -42,7 +49,7 @@ namespace ScopeOnMicrocontroller.Messages
                 // Add the timer 
                 rawTimestamp += TimerOverflows * 65536;
 
-                return (double)rawTimestamp * Reference.TIMESTAMP_FACTOR;
+                return (double)rawTimestamp * Reference.TIMESTAMP_FACTOR - StartTime;
             }
         }
         
@@ -59,7 +66,7 @@ namespace ScopeOnMicrocontroller.Messages
 
         public IncomingADC() : base()
         {
-
+            // NOOP
         }
 
         protected override int GetMessageSize()
@@ -74,16 +81,25 @@ namespace ScopeOnMicrocontroller.Messages
 
         public override void Done()
         {
-            
+            // NOOP
         }
 
         /// <summary>
-        /// This is used to calculate the timestamp
+        /// Set the amount of times the 100us counter has overflown
         /// </summary>
-        /// <param name="timerOveflows">The amount of timeroverflows that have occured</param>
-        public void SetTimerOverflows(int timerOveflows)
+        /// <param name="timerOverflows">Amount of overflows</param>
+        public void SetTimerOverflows(int timerOverflows)
         {
-            TimerOverflows = timerOveflows;
+            TimerOverflows = timerOverflows;
+        }
+
+        /// <summary>
+        /// Set the time at which the graphs start
+        /// </summary>
+        /// <param name="startTime">Time</param>
+        public void SetStartTime(double startTime)
+        {
+            StartTime = startTime;
         }
 
         public override string ToString()
@@ -95,7 +111,5 @@ namespace ScopeOnMicrocontroller.Messages
             }
             return string.Format("C:{0} D:{1} T:{2} -> {3}", Channel, Volts, Timestamp, byteformat);
         }
-
-
     }
 }
