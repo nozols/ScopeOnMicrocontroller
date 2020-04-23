@@ -15,28 +15,36 @@ namespace ScopeOnMicrocontroller.Window
     class Channel
     {
         public readonly int ChannelNumber;
+        /// <summary>
+        /// Chart objects
+        /// </summary>
         private Chart MainChart;
         private Series DataSeries;
         private DataPointCollection DataPoints;
         private Axis YAxis;
         private Axis XAxis;
 
+        /// <summary>
+        /// Inputs
+        /// </summary>
         private VoltageInput YShiftVoltage;
         private VoltageInput VPerDivision;
         private CheckBox ChannelEnabled;
         private Label SampleRateLabel;
 
+        /// <summary>
+        /// Variables
+        /// </summary>
         private Serial SerialInstance = Serial.GetInstance();
         private Mode CurrentMode = Mode.None;
-
         private int TotalRecievedSamples = 0;
         private double CurrentYShift = 0;
         private double VoltsPerDivision = 1;
         private int YDivisions = 10;
         private double ContinuousOverflows = 0;
-
         public static readonly int Height = 30 * 5;
         private static int ChannelsEnabled = 1;
+        private int DrawCounter = 0;
 
         public Channel(int channelNumber, Chart chart)
         {
@@ -46,11 +54,8 @@ namespace ScopeOnMicrocontroller.Window
             DataPoints = chart.Series[channelNumber].Points;
             YAxis = channelNumber == 0 ? chart.ChartAreas[0].AxisY : chart.ChartAreas[0].AxisY2;
             XAxis = chart.ChartAreas[0].AxisX;
-            
         }
-
         
-
         /// <summary>
         /// Handle an incoming ADC message for this channel
         ///  - Add to line graph
@@ -151,8 +156,12 @@ namespace ScopeOnMicrocontroller.Window
             SampleRateLabel.Update();
         }
 
-        int DrawCounter = 0;
-
+        
+        /// <summary>
+        /// If multiple channels are enabled draw a limited number of points.
+        /// Points = 1/(amount of tracks)
+        /// </summary>
+        /// <returns>Must this point be drawn?</returns>
         private bool DoDraw()
         {
             if (ChannelsEnabled <= 1)
@@ -289,6 +298,7 @@ namespace ScopeOnMicrocontroller.Window
                 SerialInstance.EnableChannel(ChannelNumber, enabled);
             }
 
+            // Keep track of the amount of channels that are enabled
             if (enabled)
             {
                 ChannelsEnabled++;

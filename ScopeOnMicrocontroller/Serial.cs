@@ -61,14 +61,15 @@ namespace ScopeOnMicrocontroller
         /// Connect to a serial port
         /// </summary>
         /// <exception cref="System.IO.IOException">On open error</exception>
-        /// <param name="comName"></param>
-        public void Connect(string comName)
+        /// <param name="comName">The com name to use</param>
+        /// <param name="baudrate">The baud rate to use</param>
+        public void Connect(string comName, int baudrate)
         {
             // Disconnect the current device
             Disconnect();
 
             // Create new instance of serialport class
-            _serialPort = new SerialPort(comName, Reference.BAUD_RATE, Reference.PARITY, Reference.DATA_BITS, Reference.STOP_BITS);
+            _serialPort = new SerialPort(comName, baudrate, Reference.PARITY, Reference.DATA_BITS, Reference.STOP_BITS);
 
             // Add event listener for new data
             _serialPort.DataReceived += _serialPort_DataReceived;

@@ -35,6 +35,7 @@ namespace ScopeOnMicrocontroller
 
         double ScopeStartTimestamp = -1;
         int TimerOverflows = 0;
+        int SelectedBaudRate = 256000;
 
         public Oscilloscope()
         {
@@ -183,6 +184,20 @@ namespace ScopeOnMicrocontroller
 
             buttonSingle.Enabled = connected;
             buttonContinuous.Enabled = connected;
+            comboBoxDevices.Enabled = !connected;
+            comboBoxBaudRate.Enabled = !connected;
+        }
+
+        private void comboBoxBaudRate_TextChanged(object sender, EventArgs e)
+        {
+            if(!int.TryParse(comboBoxBaudRate.Text, out int baudrate))
+            {
+                comboBoxBaudRate.SelectedIndex = 2;
+            }
+            else
+            {
+                SelectedBaudRate = baudrate;
+            }
         }
 
         /// <summary>
@@ -197,11 +212,13 @@ namespace ScopeOnMicrocontroller
             {
                 Serial.GetInstance().Disconnect();
                 buttonConnect.Text = "Connect";
+                labelInfoConnection.Text = "Not Connected";
             }
             else
             {
-                Serial.GetInstance().Connect(comboBoxDevices.Text);
+                Serial.GetInstance().Connect(comboBoxDevices.Text, SelectedBaudRate);
                 buttonConnect.Text = "Disconnect";
+                labelInfoConnection.Text = comboBoxDevices.Text + " @ " + SelectedBaudRate + " baud";
             }
 
 
@@ -435,5 +452,10 @@ namespace ScopeOnMicrocontroller
         }
 
         #endregion
+
+        private void Oscilloscope_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SerialInstance.Disconnect();
+        }
     }
 }

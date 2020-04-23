@@ -48,6 +48,8 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.numericXDivisions = new System.Windows.Forms.NumericUpDown();
+            this.comboBoxBaudRate = new System.Windows.Forms.ComboBox();
+            this.labelInfoConnection = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.MainChart)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.timeFactor)).BeginInit();
@@ -59,8 +61,9 @@
             // 
             // MainChart
             // 
-            this.MainChart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.MainChart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.MainChart.BackColor = System.Drawing.SystemColors.Control;
             chartArea1.AxisY.Title = "mV (Channel 1)";
             chartArea1.AxisY2.Title = "mV (Channel 2)";
@@ -136,7 +139,7 @@
             this.comboBoxDevices.FormattingEnabled = true;
             this.comboBoxDevices.Location = new System.Drawing.Point(643, 13);
             this.comboBoxDevices.Name = "comboBoxDevices";
-            this.comboBoxDevices.Size = new System.Drawing.Size(177, 21);
+            this.comboBoxDevices.Size = new System.Drawing.Size(75, 21);
             this.comboBoxDevices.TabIndex = 6;
             // 
             // groupBox2
@@ -292,11 +295,40 @@
             0});
             this.numericXDivisions.ValueChanged += new System.EventHandler(this.numericXDivisions_ValueChanged);
             // 
+            // comboBoxBaudRate
+            // 
+            this.comboBoxBaudRate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxBaudRate.FormattingEnabled = true;
+            this.comboBoxBaudRate.Items.AddRange(new object[] {
+            "115200",
+            "230400",
+            "256000",
+            "400000",
+            "500000"});
+            this.comboBoxBaudRate.Location = new System.Drawing.Point(725, 13);
+            this.comboBoxBaudRate.Name = "comboBoxBaudRate";
+            this.comboBoxBaudRate.Size = new System.Drawing.Size(95, 21);
+            this.comboBoxBaudRate.TabIndex = 9;
+            this.comboBoxBaudRate.Text = "256000";
+            this.comboBoxBaudRate.TextChanged += new System.EventHandler(this.comboBoxBaudRate_TextChanged);
+            // 
+            // labelInfoConnection
+            // 
+            this.labelInfoConnection.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelInfoConnection.AutoSize = true;
+            this.labelInfoConnection.Location = new System.Drawing.Point(805, 45);
+            this.labelInfoConnection.Name = "labelInfoConnection";
+            this.labelInfoConnection.Size = new System.Drawing.Size(79, 13);
+            this.labelInfoConnection.TabIndex = 10;
+            this.labelInfoConnection.Text = "Not Connected";
+            // 
             // Oscilloscope
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(938, 592);
+            this.Controls.Add(this.labelInfoConnection);
+            this.Controls.Add(this.comboBoxBaudRate);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.comboBoxDevices);
@@ -308,6 +340,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Oscilloscope";
             this.Text = "Oscilloscope on a microcontroller";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Oscilloscope_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.MainChart)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
@@ -318,6 +351,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericYDivisions)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericXDivisions)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -338,6 +372,8 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.NumericUpDown numericXDivisions;
         private System.Windows.Forms.DataVisualization.Charting.Chart MainChart;
+        private System.Windows.Forms.ComboBox comboBoxBaudRate;
+        private System.Windows.Forms.Label labelInfoConnection;
     }
 }
 
