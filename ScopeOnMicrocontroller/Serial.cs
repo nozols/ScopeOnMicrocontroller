@@ -10,9 +10,7 @@
  */
 using System;
 using System.IO.Ports;
-using System.Diagnostics;
 using ScopeOnMicrocontroller.Messages;
-using System.Collections.Generic;
 
 namespace ScopeOnMicrocontroller
 {
@@ -180,7 +178,6 @@ namespace ScopeOnMicrocontroller
         {
             if (IsConnected)
             {
-                Console.WriteLine("Outgoing message: {0}", message);
                 _serialPort.Write(new byte[] { message }, 0, 1);
             }
         }
