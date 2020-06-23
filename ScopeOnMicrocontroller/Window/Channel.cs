@@ -65,10 +65,11 @@ namespace ScopeOnMicrocontroller.Window
         /// <param name="incomingADC"> </param>
         public void IncomingADCMessage(IncomingADC incomingADC)
         {
+            /*
             if (!DoDraw())
             {
                 return;
-            }
+            }*/
 
             double timestampAdjustedForContinuous = incomingADC.Timestamp - ContinuousOverflows;
 
