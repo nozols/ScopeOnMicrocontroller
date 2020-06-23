@@ -50,6 +50,15 @@
             this.numericXDivisions = new System.Windows.Forms.NumericUpDown();
             this.comboBoxBaudRate = new System.Windows.Forms.ComboBox();
             this.labelInfoConnection = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.numericBodeStopFrequency = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.numericBodeStartFrequency = new System.Windows.Forms.NumericUpDown();
+            this.buttonStartBodePlot = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.checkBoxEnableDSP = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.MainChart)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.timeFactor)).BeginInit();
@@ -57,6 +66,10 @@
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericYDivisions)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericXDivisions)).BeginInit();
+            this.groupBox1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericBodeStopFrequency)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericBodeStartFrequency)).BeginInit();
             this.SuspendLayout();
             // 
             // MainChart
@@ -81,7 +94,7 @@
             series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
             this.MainChart.Series.Add(series1);
             this.MainChart.Series.Add(series2);
-            this.MainChart.Size = new System.Drawing.Size(627, 568);
+            this.MainChart.Size = new System.Drawing.Size(627, 703);
             this.MainChart.TabIndex = 0;
             this.MainChart.Text = "chart1";
             // 
@@ -322,11 +335,139 @@
             this.labelInfoConnection.TabIndex = 10;
             this.labelInfoConnection.Text = "Not Connected";
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.tableLayoutPanel1);
+            this.groupBox1.Location = new System.Drawing.Point(646, 536);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(285, 185);
+            this.groupBox1.TabIndex = 11;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Bode plot";
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.numericBodeStopFrequency, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.numericBodeStartFrequency, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.buttonStartBodePlot, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.checkBoxEnableDSP, 1, 2);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(7, 16);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(273, 163);
+            this.tableLayoutPanel1.TabIndex = 1;
+            // 
+            // numericBodeStopFrequency
+            // 
+            this.numericBodeStopFrequency.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.numericBodeStopFrequency.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericBodeStopFrequency.Location = new System.Drawing.Point(139, 50);
+            this.numericBodeStopFrequency.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numericBodeStopFrequency.Name = "numericBodeStopFrequency";
+            this.numericBodeStopFrequency.Size = new System.Drawing.Size(131, 20);
+            this.numericBodeStopFrequency.TabIndex = 4;
+            this.numericBodeStopFrequency.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 53);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(130, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "End frequency (Hz)";
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 13);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(130, 13);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Start frequency (Hz)";
+            // 
+            // numericBodeStartFrequency
+            // 
+            this.numericBodeStartFrequency.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.numericBodeStartFrequency.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericBodeStartFrequency.Location = new System.Drawing.Point(139, 10);
+            this.numericBodeStartFrequency.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.numericBodeStartFrequency.Name = "numericBodeStartFrequency";
+            this.numericBodeStartFrequency.Size = new System.Drawing.Size(131, 20);
+            this.numericBodeStartFrequency.TabIndex = 3;
+            // 
+            // buttonStartBodePlot
+            // 
+            this.buttonStartBodePlot.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.SetColumnSpan(this.buttonStartBodePlot, 2);
+            this.buttonStartBodePlot.Location = new System.Drawing.Point(3, 123);
+            this.buttonStartBodePlot.Name = "buttonStartBodePlot";
+            this.buttonStartBodePlot.Size = new System.Drawing.Size(267, 37);
+            this.buttonStartBodePlot.TabIndex = 5;
+            this.buttonStartBodePlot.Text = "Start Bode Plot";
+            this.buttonStartBodePlot.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 93);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(130, 13);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "Enable DSP";
+            // 
+            // checkBoxEnableDSP
+            // 
+            this.checkBoxEnableDSP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBoxEnableDSP.AutoSize = true;
+            this.checkBoxEnableDSP.Location = new System.Drawing.Point(139, 93);
+            this.checkBoxEnableDSP.Name = "checkBoxEnableDSP";
+            this.checkBoxEnableDSP.Size = new System.Drawing.Size(131, 14);
+            this.checkBoxEnableDSP.TabIndex = 7;
+            this.checkBoxEnableDSP.UseVisualStyleBackColor = true;
+            // 
             // Oscilloscope
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(938, 592);
+            this.ClientSize = new System.Drawing.Size(938, 727);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.labelInfoConnection);
             this.Controls.Add(this.comboBoxBaudRate);
             this.Controls.Add(this.groupBox3);
@@ -350,6 +491,11 @@
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericYDivisions)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericXDivisions)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericBodeStopFrequency)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericBodeStartFrequency)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -374,6 +520,15 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart MainChart;
         private System.Windows.Forms.ComboBox comboBoxBaudRate;
         private System.Windows.Forms.Label labelInfoConnection;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.NumericUpDown numericBodeStopFrequency;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.NumericUpDown numericBodeStartFrequency;
+        private System.Windows.Forms.Button buttonStartBodePlot;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox checkBoxEnableDSP;
     }
 }
 
