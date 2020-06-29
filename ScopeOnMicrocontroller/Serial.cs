@@ -106,13 +106,25 @@ namespace ScopeOnMicrocontroller
                         {
                             CurrentMessage = new IncomingTimerOverflow();
                         }
+                        else if (dataIn == IncomingStartBode.START_BYTE)
+                        {
+                            CurrentMessage = new IncomingStartBode();
+                        }
+                        else if (dataIn == IncomingDebugMessage.START_BYTE)
+                        {
+                            CurrentMessage = new IncomingDebugMessage();
+                        }
+                        else if (dataIn == IncomingBodeData.START_BYTE)
+                        {
+                            CurrentMessage = new IncomingBodeData();
+                        }
                     }
                     else
                     {
                         CurrentMessage.AddByte((byte)dataIn);
                     }
 
-                    if (CurrentMessage != null && CurrentMessage.BytesNeeded == 0)
+                    if (CurrentMessage != null && CurrentMessage.IsFinished())
                     {
                         CurrentMessage.Done();
                         ADCSerialDataReceived(CurrentMessage);
@@ -179,6 +191,33 @@ namespace ScopeOnMicrocontroller
             if (IsConnected)
             {
                 _serialPort.Write(new byte[] { message }, 0, 1);
+            }
+        }
+
+        /// <summary>
+        /// Start a bode plot
+        /// </summary>
+        /// <param name="startFrequency">Frequency to start at</param>
+        /// <param name="stopFrequency">Frequency to stop at</param>
+        /// <param name="enabledDSP">Pass the singal through the internal DSP</param>
+        /// <returns></returns>
+        public bool StartBodePlot(int startFrequency, int stopFrequency, bool enabledDSP)
+        {            
+            if (IsConnected)
+            {
+                byte[] totalMessage = new byte[] {
+                    (byte)(Reference.MSG_START_BODE + Convert.ToByte(enabledDSP)),
+                    (byte)((startFrequency >> 8) & 0xFF),
+                    (byte)(startFrequency & 0xFF),
+                    (byte)((stopFrequency >> 8) & 0xFF),
+                    (byte)(stopFrequency & 0xFF)
+                };
+                _serialPort.Write(totalMessage, 0, 5);
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

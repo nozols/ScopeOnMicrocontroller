@@ -21,7 +21,7 @@ namespace ScopeOnMicrocontroller
     /// </summary>
     enum Mode
     {
-        Single, Continuous, None
+        Single, Continuous, None, Bode
     }
 
     public partial class Oscilloscope : Form
@@ -32,6 +32,8 @@ namespace ScopeOnMicrocontroller
 
         private Serial SerialInstance = Serial.GetInstance();
         private Axis XAxis;
+
+        private BodePlot bodePlotForm;
 
         double ScopeStartTimestamp = -1;
         int TimerOverflows = 0;
@@ -134,6 +136,18 @@ namespace ScopeOnMicrocontroller
                 {
                     IncomingTimerOverflow();
                 }
+                else if (serialData is IncomingBodeData)
+                {
+                    // Create new window if no window is available or if graph is already complete
+                    if ((bodePlotForm == null || bodePlotForm.IsDisposed) || bodePlotForm.IsGraphComplete)
+                    {
+                        bodePlotForm = new BodePlot(decimal.ToInt32(numericBodeStartFrequency.Value), decimal.ToInt32(numericBodeStopFrequency.Value));
+                        bodePlotForm.Show();
+                    }
+                    
+                    // Add the data point
+                    bodePlotForm.AddDataPoint((IncomingBodeData)serialData);
+                }
             }
         }
 
@@ -184,6 +198,7 @@ namespace ScopeOnMicrocontroller
 
             buttonSingle.Enabled = connected;
             buttonContinuous.Enabled = connected;
+            buttonStartBodePlot.Enabled = connected;
             comboBoxDevices.Enabled = !connected;
             comboBoxBaudRate.Enabled = !connected;
         }
@@ -343,6 +358,11 @@ namespace ScopeOnMicrocontroller
                 buttonContinuous.BackColor = Color.LawnGreen;
                 SyncChannelEnabled();
             }
+            else if (mode == Mode.Bode)
+            {
+                buttonSingle.BackColor = Color.Salmon;
+                buttonContinuous.BackColor = Color.Salmon;
+            }
             else
             {
                 buttonSingle.BackColor = Color.Salmon;
@@ -449,6 +469,30 @@ namespace ScopeOnMicrocontroller
             {
                 channel.ClearChannel();
             }
+        }
+
+        #endregion
+
+        #region Bode plot
+
+        /// <summary>
+        /// Called when the user wants to start a bode plot.
+        ///  - Update the mode
+        ///  - Send the configuration to the device
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void buttonStartBodePlot_Click(object sender, EventArgs e)
+        {
+            if (bodePlotForm == null || bodePlotForm.IsDisposed || bodePlotForm.IsGraphComplete)
+            { 
+                int startFrequency = decimal.ToInt32(numericBodeStartFrequency.Value);
+                int stopFrequency = decimal.ToInt32(numericBodeStopFrequency.Value);
+                bool enabledDSP = checkBoxEnableDSP.Checked;
+
+                SerialInstance.StartBodePlot(startFrequency, stopFrequency, enabledDSP);
+                UpdateMode(Mode.Bode);
+            } 
         }
 
         #endregion

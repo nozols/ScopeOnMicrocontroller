@@ -77,6 +77,15 @@ namespace ScopeOnMicrocontroller
         public const byte MSG_ENABLE_ADC = 0b10101100;
 
         /// <summary>
+        /// The message for starting a bode plot (this must be followed by the configuration)
+        /// FORMAT: 0b1101101x
+        /// x = DSP enabled
+        /// </summary>
+        public const byte MSG_START_BODE = 0b11011010;
+
+        public const byte MSG_DEBUG_MSG = 0b01101101;
+
+        /// <summary>
         /// Determine the factor for the timestamp (in seconds).
         /// Currently the factor is 100 us.
         /// This means that 1 count equals 100us

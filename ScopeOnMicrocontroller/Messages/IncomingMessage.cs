@@ -1,6 +1,12 @@
-﻿namespace ScopeOnMicrocontroller.Messages
+﻿/*
+ * @Author Niels de Boer
+ * 
+ * Base class for incoming messages from the serial port
+ */
+
+namespace ScopeOnMicrocontroller.Messages
 {
-    abstract class IncomingMessage
+    public abstract class IncomingMessage
     {
 
         protected byte[] ReceivedBytes;
@@ -8,7 +14,7 @@
         /// <summary>
         /// The amounts of bytes that this message has already received (excluding start byte)
         /// </summary>
-        private int ReceivedBytesCount = 0;
+        protected int ReceivedBytesCount = 0;
 
         /// <summary>
         /// The amount of bytes that is still needed to complete this message
@@ -53,6 +59,15 @@
             ReceivedBytesCount++;
         }
 
+        /// <summary>
+        /// Determine wether this message is finished
+        /// By default it is finished if there are no more bytes needed
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool IsFinished()
+        {
+            return BytesNeeded == 0;
+        }
 
     }
 }

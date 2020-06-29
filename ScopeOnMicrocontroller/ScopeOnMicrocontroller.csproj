@@ -85,8 +85,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Messages\IncomingADC.cs" />
+    <Compile Include="Messages\IncomingBodeData.cs" />
+    <Compile Include="Messages\IncomingDebugMessage.cs" />
     <Compile Include="Messages\IncomingMessage.cs" />
+    <Compile Include="Messages\IncomingStartBode.cs" />
     <Compile Include="Messages\IncomingTimerOverflow.cs" />
+    <Compile Include="Window\BodePlot.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Window\BodePlot.Designer.cs">
+      <DependentUpon>BodePlot.cs</DependentUpon>
+    </Compile>
     <Compile Include="Window\Channel.cs" />
     <Compile Include="Window\Oscilloscope.cs">
       <SubType>Form</SubType>
@@ -99,6 +108,9 @@
     <Compile Include="Reference.cs" />
     <Compile Include="Serial.cs" />
     <Compile Include="Window\VoltageInput.cs" />
+    <EmbeddedResource Include="Window\BodePlot.resx">
+      <DependentUpon>BodePlot.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Window\Oscilloscope.resx">
       <DependentUpon>Oscilloscope.cs</DependentUpon>
     </EmbeddedResource>
